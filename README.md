@@ -29,13 +29,13 @@
 sequenceDiagram
     actor client
 
-    box Blue API
+    box MediumSlateBlue API
         participant SendMsg
         participant GetMsg
         participant Search
     end
 
-    box DarkRed DB
+    box OliveDrab DB
         participant Elastic 
         participant MongoDB
     end
@@ -64,17 +64,17 @@ JSON сообщения сохраняется напрямую в `MongoDB` и 
 sequenceDiagram
     actor client
 
-    box Blue API
+    box MediumSlateBlue API
         participant SendMsg
         participant GetMsg
         participant Search
     end
 
-    box DarkSlateGray DB-cache
+    box Olive DB-cache
         participant Key-db
     end
 
-    box DarkRed DB
+    box OliveDrab DB
         participant Elastic 
         participant MongoDB
     end
@@ -132,13 +132,13 @@ sequenceDiagram
 sequenceDiagram
     actor client
 
-    box Blue API
+    box MediumSlateBlue API
         participant SendMsg
         participant GetMsg
         participant Search
     end
 
-    box DarkRed DB
+    box OliveDrab DB
         participant Elastic 
         participant MongoDB
     end
