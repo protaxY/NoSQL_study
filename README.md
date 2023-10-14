@@ -29,6 +29,7 @@
 sequenceDiagram
     actor client
 
+
     box MediumSlateBlue API
         participant SendMsg
         participant GetMsg
