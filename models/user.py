@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 
+from bson import ObjectId
+
 class User(BaseModel):
-    id: str
+    id: ObjectId
     name: str
     username: str
     # profile_picture: 

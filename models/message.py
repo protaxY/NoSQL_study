@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
+from bson import ObjectId
+
 class Message(BaseModel):
-    id: str
-    from_id: str
-    to_id: str
-    # timestamp: 
+    id: ObjectId
+    from_id: ObjectId
+    to_id: ObjectId
     text_content: str
-    images_content: str
