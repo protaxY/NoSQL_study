@@ -1,3 +1,5 @@
+from typing import Any
+
 from bson import ObjectId
 
 from models.user import User

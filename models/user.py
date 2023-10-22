@@ -3,13 +3,22 @@ from pydantic import BaseModel
 from bson import ObjectId
 
 class User(BaseModel):
-    id: ObjectId
+    id: str
     name: str
     username: str
-    # profile_picture: 
+    
+    @staticmethod
+    def map_mongo_user(user):
+        if user is None:
+            return None
+        
+        return User(id=str(user['_id']),
+                    name=user['name'],
+                    username=user['username'])
 
 class InsertUser(BaseModel):
     username: str
-    @property
-    def name(self):
-        return self.username
+    name: str
+#     # @property
+#     # def name(self):
+#     #     return self.username
