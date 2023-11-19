@@ -1,11 +1,12 @@
 import os
+from datetime import datetime
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
 from models.user import User, InsertUser
-from models.message import Message
+from models.message import Message, PostMessage
 
-from utils import filter_by_id
+from repository.utils import filter_by_id
 
 db_client: AsyncIOMotorClient = None
 
@@ -50,28 +51,45 @@ class MongoMessengerDatabase():
         mongo_users_collection = os.getenv('MONGO_USERS_COLLECTION')
         mongo_messages_collection = os.getenv('MONGO_MESSAGES_COLLECTION')
     
-        self._mongo_users_collection = self._db_client.get_database(mongo_messenger_db).get_collection(mongo_users_collection)
-        self._mongo_messages_collection = self._db_client.get_database(mongo_messenger_db).get_collection(mongo_messages_collection)
+        self._mongo_users_collection = db_client.get_database(mongo_messenger_db).get_collection(mongo_users_collection)
+        self._mongo_messages_collection = db_client.get_database(mongo_messenger_db).get_collection(mongo_messages_collection)
 
     async def __del__(self):
         self.close_connection()
 
-    async def add_user(self, user: InsertUser):
+    async def create_user(self, user: InsertUser):
         insert_result = await self._mongo_users_collection.insert_one(dict(user))
         return insert_result
 
-    async def get_user(self, user_id: str):
+    async def get_user_by_id(self, user_id: str):
         user = await self._mongo_users_collection.find_one(filter_by_id(user_id))
         return user
 
-    async def add_message(self, message: Message):
+    async def add_message(self, message: PostMessage):
         insert_result = await self._mongo_messages_collection.insert_one(dict(message))
         return insert_result
     
-    async def get_message(self, message_id: str):
+    async def get_message_by_id(self, message_id: str):
         message = await self._mongo_messages_collection.find_one(filter_by_id(message_id))
         return message
     
+    async def get_chat_history(self, user_id: str, companion_id: str, date_offset: datetime = None, limit: int = 10):
+        if not date_offset:
+            chat_history = await self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id}, 
+                                                                               {"sender_id": companion_id, "receiver_id": user_id}]}).limit(limit).sort("creation_date")
+        else:
+            chat_history = await self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id}, 
+                                                                               {"sender_id": companion_id, "receiver_id": user_id}], 
+                                                                       "creation_date": {"$gt": date_offset}}).limit(limit).sort("creation_date")
+        return chat_history
+
+    # async def get_user_history(self, user_id: str, limit = 10):
+    #     pipeline = [
+    #         {"$match": {"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}}
+    #         {"$group": {"_id": "$tags", "count": {"$sum": 1}}}
+    #     ]
+    #     user_history = await self._mongo_users_collection
+
     @staticmethod
     def get_instance():
         return MongoMessengerDatabase()
