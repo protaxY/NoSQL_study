@@ -57,6 +57,8 @@ async def get_chat_history(user_id: str, companion_id: str, date_offset: datetim
 
 @router.get("/users/{user_id}/chats", response_model=List[str])
 async def get_recent_users(user_id: str, messenger_db: MongoMessengerDatabase = Depends(MongoMessengerDatabase.get_instance)):
+    if not ObjectId.is_valid(user_id):
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
     recent_users = await messenger_db.get_recent_users(user_id)
     return recent_users
 

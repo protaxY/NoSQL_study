@@ -12,6 +12,14 @@ class RawMessage(BaseModel):
     receiver_id: str
     content: MessageContent
 
+    def __iter__(self):
+        data = {}
+        for key, value in self.__dict__.items():
+            try:
+                yield (key, dict(value))
+            except Exception:
+                yield (key, value)
+
 class PostMessage(RawMessage):
     post_date: datetime
 

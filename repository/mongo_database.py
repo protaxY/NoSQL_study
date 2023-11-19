@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+from bson import ObjectId
+
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 
 from models.user import User, InsertUser
@@ -82,31 +84,38 @@ class MongoMessengerDatabase():
 
     async def get_chat_history(self, user_id: str, companion_id: str, date_offset: datetime = None, limit: int = 10):
         if not date_offset:
-            chat_history = await self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
+            cursor = self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
                                                                                {"sender_id": companion_id, "receiver_id": user_id}]}).limit(limit).sort("creation_date")
         else:
-            chat_history = await self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
+            cursor = self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
                                                                                {"sender_id": companion_id, "receiver_id": user_id}],
                                                                        "creation_date": {"$gt": date_offset}}).limit(limit).sort("creation_date")
+        chat_history = []
+        async for message in cursor:
+            chat_history.append(message)
+
         return chat_history
 
     async def get_recent_users(self, user_id: str, date_offset: datetime = None, limit=10):
-        pipeline = [
-            {"$match": {"$and": [{"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}, {"post_date": {"$gt": date_offset}}]}},
-            {"$project": {"post_date": True, 
-                          "dialoge_members": {"$setUnion": ["$sender_id", "$receiver_id"]},
-                          "result": {"$sortArray": {"input": "$dialoge_members", "sortBy": 1}}}},
+        if not date_offset:
+            pipeline = [{"$match": {"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}}]
+        else:
+            pipeline = [{"$match": {"$and": [{"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}, {"post_date": {"$gt": date_offset}}]}}]
+        pipeline += [
+            {"$project": {"post_date": True, "dialoge_members": {"$setUnion": [["$sender_id"], ["$receiver_id"]]}}},
+            {"$sort": {"dialoge_members": 1}},
             {"$group": {"_id": "$dialoge_members", "last_post_date": {"$max": "$post_date"}}},
-            {"$sort": {"post_date": -1}},
+            {"$sort": {"last_post_date": -1}},
             {"$limit": limit}
         ]
-        recent_users = []
 
+        recent_users = []
         async for recent_post in self._mongo_messages_collection.aggregate(pipeline):
-            for dialoge_member in recent_post["dialoge_members"]:
+            print(recent_post)
+            for dialoge_member in recent_post["_id"]:
                 if dialoge_member != user_id:
-                    recent_users.append[dialoge_member]
-                    break
+                    recent_users.append(dialoge_member)
+            break
 
         return recent_users
 
