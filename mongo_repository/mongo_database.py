@@ -8,14 +8,12 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorCollection
 from models.user import User, InsertUser
 from models.message import Message, PostMessage
 
-from repository.utils import filter_by_id
+from mongo_repository.mongo_utils import filter_by_id
 
 db_client: AsyncIOMotorClient = None
 
 
 async def connect_mongo_messenger_database():
-    print(os.getenv('MONGO_MESSENGER_URI'), flush=True)
-
     global db_client
     mongo_messenger_uri = os.getenv('MONGO_MESSENGER_URI')
     mongo_messenger_db = os.getenv('MONGO_MESSENGER_DB')
@@ -25,7 +23,7 @@ async def connect_mongo_messenger_database():
     try:
         db_client = AsyncIOMotorClient(mongo_messenger_uri)
         await db_client.server_info()
-        print(f'Connected to mongo with uri {mongo_messenger_uri}', flush=True)
+        print(f'Connected to mongo with uri {mongo_messenger_uri}')
 
         # создать базу данных, если еще нет
         if mongo_messenger_db not in await db_client.list_database_names():
@@ -37,12 +35,12 @@ async def connect_mongo_messenger_database():
             mongo_messages_collection = db_client.get_database(
                 mongo_messenger_db).get_collection(mongo_messages_collection)
 
-            print(f'Database {mongo_messenger_db} created successfully!', flush=True)
+            print(f'Database {mongo_messenger_db} created successfully!')
 
             return True
 
     except Exception as ex:
-        print(f'Can\'t connect to mongo: {ex}', flush=True)
+        print(f'Can\'t connect to mongo: {ex}')
 
         return False
 
@@ -113,7 +111,7 @@ class MongoMessengerDatabase():
 
         recent_users = []
         async for recent_post in self._mongo_messages_collection.aggregate(pipeline):
-            print(recent_post, flush=True)
+            print(recent_post)
             for dialoge_member in recent_post["_id"]:
                 if dialoge_member != user_id:
                     recent_users.append(dialoge_member)

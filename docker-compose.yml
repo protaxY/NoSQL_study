@@ -4,10 +4,9 @@ services:
     ports:
       - 8000:8000
     environment:
-      - MONGO_URI=mongodb:${MONGO_MESSENGER_URI}
+      - MONGO_MESSENGER_URI=mongodb://mongo_db:27017
     depends_on:
-      mongo_db:
-        condition: service_started
+      - mongo_db
 
   mongo_db:
     image: mongo
