@@ -8,7 +8,7 @@ from bson import ObjectId
 from models.user import User, InsertUser
 from models.message import Message, MessageContent, PostMessage, RawMessage
 
-from repository.mongo_database import MongoMessengerDatabase
+from repository.mongo.database import MongoMessengerDatabase
 
 router = APIRouter()
 

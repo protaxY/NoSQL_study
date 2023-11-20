@@ -1,0 +1,75 @@
+import os
+from typing import List
+
+from elasticsearch import AsyncElasticsearch
+from NoSQL_study.models.message import PostMessage
+
+from models.user import InsertUser, User
+
+
+elasticsearch_client: AsyncElasticsearch = None
+
+async def connect_elastic_messenger_database():
+    global elasticsearch_client
+    elasticsearch_messenger_uri = os.getenv('ELASTICSEARCH_MESSANGER_URI')
+    try:
+        elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri)
+        await elasticsearch_client.info()
+        print(f'Connected to elasticsearch with uri {elasticsearch_messenger_uri}')
+    except Exception as ex:
+        print(f'Cant connect to elasticsearch: {ex}')
+
+async def close_elasticsearch_connect():
+    global elasticsearch_client
+    if elasticsearch_client is None:
+        return
+    await elasticsearch_client.close()
+
+class ElasticsearchMessengerDatabase():
+    def __init__(self):       
+        self._elasticsearch_users_index = os.getenv('ELASTICSEARCH_USERS_INDEX')
+        self._elasticsearch_messages_index = os.getenv('ELASTICSEARCH_MESSAGES_INDEX')
+        
+    async def get_by_username(self, username: str) -> List[User]:
+        query = {"match": {"name": {"query": username}}}
+        response = await elasticsearch_client.search(index=self._elasticsearch_users_index,
+                                                     query=query,
+                                                     filter_path=['hits.hits._id', 'hits.hits._source'])
+        if 'hits' not in response.body:
+            return []
+        response_users = response.body['hits']['hits']
+        users = list(map(lambda user: User(id=user['_id'], 
+                                           name=user['_source']['name'], 
+                                           username=user['_source']['username'],
+                                           creation_date=user['_source']['creation_date']), users))
+        return users
+    
+    async def get_by_name(self, name: str) -> List[User]:
+        query = {"match": {"name": {"query": name}}}
+        response = await elasticsearch_client.search(index=self._elasticsearch_users_index,
+                                                     query=query,
+                                                     filter_path=['hits.hits._id', 'hits.hits._source'])
+        if 'hits' not in response.body:
+            return []
+        response_users = response.body['hits']['hits']
+        users = list(map(lambda user: User(id=user['_id'], 
+                                           name=user['_source']['name'], 
+                                           username=user['_source']['username'],
+                                           creation_date=user['_source']['creation_date']), users))
+        return users
+    
+    async def create_user(self, user_id: str, user: InsertUser):
+        await self.elasticsearch_client.create(index=self._elasticsearch_users_index, id=user_id, document=dict(user))
+
+    async def update_user(self, user_id: str, user: InsertUser):
+        await self._elasticsearch_client.update(index=self._elasticsearch_index, id=user_id, doc=dict(user))
+
+    async def delete_user(self, user_id: str):
+        await self._elasticsearch_client.delete(index=self._elasticsearch_index, id=user_id)
+    
+    async def create_message(self, message_id: str, message: PostMessage) -> str:
+        await self.elasticsearch_client.create(index=self._elasticsearch_messages_index, id=message_id, document=dict(message))
+
+    @staticmethod
+    def get_instance():
+        return ElasticsearchMessengerDatabase()

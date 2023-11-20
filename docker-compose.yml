@@ -5,10 +5,39 @@ services:
       - 8000:8000
     environment:
       - MONGO_MESSENGER_URI=mongodb://mongo_db:27017
+      - ELASTICSEARCH_URI=http://elasticsearch_db:9200
+
     depends_on:
-      - mongo_db
+      mongo_db:
+        condition: service_started
+      elasticsearch_db:
+        condition: service_healthy
 
   mongo_db:
     image: mongo
+    ports:
+      - 27017:27017
     volumes:
       - ./data/mongo:/data/db
+
+  elasticsearch_db:
+    image: elasticsearch:8.10.2
+    healthcheck:
+      interval: 5s
+      retries: 80
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://elasticsearch_db:9200
+    volumes:
+      - ./data:/data/db
+    environment:
+      - xpack.security.enabled=false
+      - discovery.type=single-node
+
+  kibana:
+    image: kibana:8.10.2
+    ports:
+    - '5601:5601'
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch_db:9200
+    depends_on:
+      elasticsearch_db:
+        condition: service_healthy

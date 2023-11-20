@@ -1,11 +1,19 @@
-import os
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 import uvicorn
 
 from api.router import router
-from repository.mongo_database import connect_mongo_messenger_database, close_mongo_messenger_database
+
+from repository.mongo.database import connect_mongo_messenger_database, close_mongo_messenger_database
+from repository.elasticsearch.database import connect_elastic_messenger_database, close_elasticsearch_connect
+
+async def Startup():
+    await connect_mongo_messenger_database()
+    await connect_elastic_messenger_database()
+
+async def Shutdown():
+    await close_mongo_messenger_database()
+    await close_elasticsearch_connect()
 
 load_dotenv()
 
