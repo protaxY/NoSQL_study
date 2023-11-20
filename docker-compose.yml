@@ -1,0 +1,14 @@
+services:
+  nosql_study_api:
+    build: .
+    ports:
+      - 8000:8000
+    environment:
+      - MONGO_MESSENGER_URI=mongodb://mongo_db:27017
+    depends_on:
+      - mongo_db
+
+  mongo_db:
+    image: mongo
+    volumes:
+      - ./data/mongo:/data/db

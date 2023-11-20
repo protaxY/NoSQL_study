@@ -4,3 +4,10 @@
 
 # files
 *.zip
+*.ipynb
+
+# cache
+__pycache__/
+
+# data
+data/
