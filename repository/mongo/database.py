@@ -69,7 +69,7 @@ class MongoMessengerDatabase():
 
     async def create_user(self, user: InsertUser) -> str:
         insert_result = await self._mongo_users_collection.insert_one(dict(user))
-        return insert_result
+        return str(insert_result.inserted_id)
 
     async def get_user_by_id(self, user_id: str) -> User:
         user = await self._mongo_users_collection.find_one(filter_by_id(user_id))
@@ -77,7 +77,7 @@ class MongoMessengerDatabase():
 
     async def add_message(self, message: PostMessage) -> str:
         insert_result = await self._mongo_messages_collection.insert_one(dict(message))
-        return insert_result
+        return str(insert_result.inserted_id)
 
     async def get_message_by_id(self, message_id: str) -> Message:
         message = await self._mongo_messages_collection.find_one(filter_by_id(message_id))

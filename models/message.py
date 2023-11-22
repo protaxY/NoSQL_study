@@ -31,5 +31,5 @@ class Message(PostMessage):
         return cls(id=str(message['_id']),
                    sender_id=message['sender_id'],
                    receiver_id=message['receiver_id'],
-                   content=message['content'],
+                   content=MessageContent(text_content=message['content']['text_content']),
                    post_date=message['post_date'])
