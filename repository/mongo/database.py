@@ -84,7 +84,7 @@ class MongoMessengerDatabase():
         return Message.Map(message)
 
     async def get_chat_history(self, user_id: str, companion_id: str, date_offset: datetime = None, limit: int = 10) -> List[Message]:
-        if not date_offset:
+        if date_offset is None:
             cursor = self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
                                                                                {"sender_id": companion_id, "receiver_id": user_id}]}).limit(limit).sort("creation_date")
         else:
@@ -98,7 +98,7 @@ class MongoMessengerDatabase():
         return chat_history
 
     async def get_recent_users(self, user_id: str, date_offset: datetime = None, limit=10) -> List[str]:
-        if not date_offset:
+        if date_offset is None:
             pipeline = [{"$match": {"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}}]
         else:
             pipeline = [{"$match": {"$and": [{"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}, {"post_date": {"$gt": date_offset}}]}}]

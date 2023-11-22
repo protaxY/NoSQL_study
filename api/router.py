@@ -34,10 +34,10 @@ async def get_user_profile_by_id(user_id: str,
     user = await messenger_db.get_user_by_id(user_id)
     if user is None:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
-    return User.Map(user)
+    return user
 
 
-@router.get("/users/search", response_model=List[User])
+@router.get("/users", response_model=List[User])
 async def find_user_by_username(pattern: str,
                                 search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
     return await search_db.get_by_username(pattern)
