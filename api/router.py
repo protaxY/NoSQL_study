@@ -39,7 +39,7 @@ async def get_user_profile_by_id(user_id: str,
 
 @router.get("/users/search", response_model=List[User])
 async def find_user_by_username(pattern: str,
-                                    search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
+                                search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
     return await search_db.get_by_username(pattern)
 
 
@@ -71,7 +71,9 @@ async def get_chat_history(user_id: str, companion_id: str, date_offset: datetim
 
 @router.get("/users/{user_id}/chats/{companion_id}/search", response_model=List[Message])
 async def find_message(pattern: str, user_id: str, companion_id: str,
-                           search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
+                       search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
+    if not ObjectId.is_valid(user_id) or not ObjectId.is_valid(companion_id):
+        return Response(status_code=status.HTTP_400_BAD_REQUEST)
     return await search_db.find_message(user_id, companion_id, pattern)
 
 @router.get("/users/{user_id}/chats", response_model=List[str])
