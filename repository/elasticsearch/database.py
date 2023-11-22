@@ -33,7 +33,7 @@ class ElasticsearchMessengerDatabase():
         self._elasticsearch_messages_index = os.getenv('ELASTICSEARCH_MESSAGES_INDEX')
         
     async def get_by_username(self, username: str) -> List[User]:
-        query = {"match": {"name": {"query": username}}}
+        query = {"match": {"username": {"query": username}}}
         response = await elasticsearch_client.search(index=self._elasticsearch_users_index,
                                                      query=query,
                                                      filter_path=['hits.hits._id', 'hits.hits._source'])
