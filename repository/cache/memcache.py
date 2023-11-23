@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pymemcache import HashClient
 
-from cache.serializer import JsonSerializer
+from repository.cache.serializer import JsonSerializer
 
 
 sys.stdout.flush()
@@ -67,13 +67,6 @@ def map_client_array(memcached_clients):
     memcached_message_client = memcached_clients[1]
     memcached_chat_history_client = memcached_clients[2]
     memcached_recent_users_client = memcached_clients[3]
-
-# def datetime_to_string(date_offset: datetime | None):
-#     if date_offset is None:
-#         key = str(datetime.utcnow()).replace(' ', '_')
-#     else:
-#         key = str(date_offset).replace(' ', '_')
-#     return key
 
 def get_memcached_user_client():
     return memcached_user_client

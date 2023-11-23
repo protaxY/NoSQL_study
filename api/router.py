@@ -15,7 +15,7 @@ from repository.elasticsearch.database import ElasticsearchMessengerDatabase
 
 from pymemcache import HashClient
 
-from cache.memcache import get_memcached_user_client, get_memcached_message_client, get_memcached_chat_history_client, get_memcached_recent_users_client
+from repository.cache.memcache import get_memcached_user_client, get_memcached_message_client, get_memcached_chat_history_client, get_memcached_recent_users_client
 
 sys.stdout.flush()
 
