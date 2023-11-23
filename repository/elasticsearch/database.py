@@ -13,7 +13,7 @@ elasticsearch_client: AsyncElasticsearch = None
 
 async def connect_elastic_messenger_database():
     global elasticsearch_client
-    elasticsearch_messenger_uri = os.getenv('ELASTICSEARCH_MESSANGER_URI')
+    elasticsearch_messenger_uri = os.getenv('ELASTICSEARCH_MESSENGER_URI')
     try:
         elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri)
         await elasticsearch_client.info()
