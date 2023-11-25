@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 from typing import List
 
@@ -10,6 +11,8 @@ from models.user import User, InsertUser
 from models.message import Message, PostMessage
 
 from repository.mongo.utils import filter_by_id
+
+sys.stdout.flush()
 
 mongo_client: AsyncIOMotorClient = None
 

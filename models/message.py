@@ -13,10 +13,12 @@ class RawMessage(BaseModel):
     content: MessageContent
 
     def __iter__(self):
-        data = {}
         for key, value in self.__dict__.items():
             try:
-                yield (key, dict(value))
+                if isinstance(value, datetime): # сделано для работы кэша
+                    yield (key, value.isoformat())
+                else:
+                    yield (key, dict(value))
             except Exception:
                 yield (key, value)
 
@@ -32,4 +34,4 @@ class Message(PostMessage):
                    sender_id=message['sender_id'],
                    receiver_id=message['receiver_id'],
                    content=MessageContent(text_content=message['content']['text_content']),
-                   post_date=message['post_date'])
+                   post_date=datetime.fromisoformat(message['post_date']))

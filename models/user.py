@@ -3,11 +3,23 @@ from typing import Any
 
 from pydantic import BaseModel
 
-class User(BaseModel):
-    id: str
+class InsertUser(BaseModel):
     name: str
     username: str
     creation_date: datetime
+
+    def __iter__(self):
+        for key, value in self.__dict__.items():
+            try:
+                if isinstance(value, datetime): # сделано для работы кэша
+                    yield (key, value.isoformat())
+                else:
+                    yield (key, dict(value))
+            except Exception:
+                yield (key, value)
+
+class User(InsertUser):
+    id: str
     # profile_picture:
 
     @classmethod
@@ -15,10 +27,4 @@ class User(BaseModel):
         return cls(id=str(user['_id']),
                    name=user['name'],
                    username=user['username'],
-                   creation_date=user['creation_date'])
-
-
-class InsertUser(BaseModel):
-    name: str
-    username: str
-    creation_date: datetime
+                   creation_date=datetime.fromisoformat(user['creation_date']))

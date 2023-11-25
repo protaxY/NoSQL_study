@@ -5,7 +5,12 @@ services:
       - 8000:8000
     environment:
       - MONGO_MESSENGER_URI=mongodb://mongo_db:27017
-      - ELASTICSEARCH_MESSANGER_URI=http://elasticsearch_db:9200
+      - ELASTICSEARCH_MESSENGER_URI=http://elasticsearch_db:9200
+
+      - MEMCACHED_MESSENGER_USER_URI=memcached_user_node_01:11211
+      - MEMCACHED_MESSENGER_MESSAGE_URI=memcached_message_node_01:11211
+      - MEMCACHED_MESSENGER_CHAT_HISTORY_URI=memcached_chat_history_node_01:11211
+      - MEMCACHED_MESSENGER_RECENT_USERS_URI=memcached_recent_users_node_01:11211
 
     depends_on:
       mongo_db:
@@ -22,6 +27,8 @@ services:
 
   elasticsearch_db:
     image: elasticsearch:8.10.2
+    ports:
+      - 9200:9200
     healthcheck:
       interval: 1s
       retries: 60
@@ -43,3 +50,23 @@ services:
     depends_on:
       elasticsearch_db:
         condition: service_healthy
+
+  memcached_user_node_01:
+    image: memcached
+    ports:
+      - 11211:11211
+  
+  memcached_message_node_01:
+    image: memcached
+    ports:
+      - 11212:11211
+
+  memcached_chat_history_node_01:
+    image: memcached
+    ports:
+      - 11213:11211
+
+  memcached_recent_users_node_01:
+    image: memcached
+    ports:
+      - 11214:11211
