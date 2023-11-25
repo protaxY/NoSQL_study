@@ -15,7 +15,7 @@ async def connect_elastic_messenger_database():
     global elasticsearch_client
     elasticsearch_messenger_uri = os.getenv('ELASTICSEARCH_MESSENGER_URI')
     try:
-        elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri)
+        elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri.split(','))
         await elasticsearch_client.info()
         print(f'Connected to elasticsearch with uri {elasticsearch_messenger_uri}')
     except Exception as ex:
