@@ -3,6 +3,7 @@ x-api-config: &api-config
   env_file:
     - infrastructure/docker.env
   depends_on:
+    
     mongo_cluster_init:
       condition: service_completed_successfully
     
@@ -51,14 +52,14 @@ x-mongodb-healthcheck: &mongodb-healhcheck
 
 x-elasticsearch-healhcheck: &elasticsearch-healhcheck
   healthcheck:
-    interval: 5s
-    retries: 80
+    interval: 1s
+    retries: 60
     test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://127.0.0.1:9200
 
 x-memcached-healhcheck: &memcached-healhcheck
   healthcheck:
-    test: echo stats | nc 127.0.0.1 11211
-    interval: 10s
+    test: echo stats | nc 127.0.0.1 11211 
+    interval: 1s
     retries: 60
 
 services:
@@ -112,7 +113,7 @@ services:
     <<: [ *elasticsearch-healhcheck ]
     environment:
       - node.name=elasticsearch_node_01
-      - discovery.seed_hosts=elasticsearch_node_02,elasticsearch_node_03
+      - discovery.seed_hosts=[elasticsearch_node_02,elasticsearch_node_03]
     env_file:
       - infrastructure/elasticsearch.env
     volumes:
@@ -123,7 +124,7 @@ services:
     <<: [ *elasticsearch-healhcheck ]
     environment:
      - node.name=elasticsearch_node_02
-     - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_03
+     - discovery.seed_hosts=[elasticsearch_node_01,elasticsearch_node_03]
     env_file:
       - infrastructure/elasticsearch.env
     volumes:
@@ -134,7 +135,7 @@ services:
     <<: [ *elasticsearch-healhcheck ]
     environment:
      - node.name=elasticsearch_node_03
-     - discovery.seed_hosts=elasticsearch_node_01,elasticsearch_node_02
+     - discovery.seed_hosts=[elasticsearch_node_01,elasticsearch_node_02]
     env_file:
       - infrastructure/elasticsearch.env
     volumes:
@@ -157,51 +158,51 @@ services:
         condition: service_healthy
 
   memcached_user_node_01:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
   
   memcached_user_node_02:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
   
   memcached_user_node_03:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
   
   memcached_message_node_01:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
   
   memcached_message_node_02:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
     
   memcached_message_node_03:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_chat_history_node_01:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_chat_history_node_02:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_chat_history_node_03:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_recent_users_node_01:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_recent_users_node_02:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
   memcached_recent_users_node_03:
-    image: memcached
+    image: memcached:alpine
     <<: *memcached-healhcheck
 
 
