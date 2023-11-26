@@ -83,13 +83,14 @@ async def get_chat_history(user_id: str, companion_id: str, date_offset: datetim
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     
     if date_offset is not None:
+        print("in iso format", date_offset.isoformat(), flush=True)
         chat_history = memcached_chat_history_client.get(date_offset.isoformat())
         if chat_history is not None:
             print('using cached chat history data')
             return chat_history
     
     chat_history = await messenger_db.get_chat_history(user_id, companion_id=companion_id, date_offset=date_offset)
-    if chat_history is None:
+    if chat_history is None or len(chat_history) == 0:
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     
     for message in chat_history:
