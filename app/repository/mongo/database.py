@@ -89,11 +89,11 @@ class MongoMessengerDatabase():
     async def get_chat_history(self, user_id: str, companion_id: str, date_offset: datetime = None, limit: int = 10) -> List[Message]:
         if date_offset is None:
             cursor = self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
-                                                                               {"sender_id": companion_id, "receiver_id": user_id}]}).limit(limit).sort("creation_date")
+                                                                               {"sender_id": companion_id, "receiver_id": user_id}]}).limit(limit).sort("post_date")
         else:
             cursor = self._mongo_messages_collection.find({"$or": [{"sender_id": user_id, "receiver_id": companion_id},
                                                                                {"sender_id": companion_id, "receiver_id": user_id}],
-                                                                       "creation_date": {"$gt": date_offset}}).limit(limit).sort("creation_date")
+                                                                       "post_date": {"$lt": date_offset.isoformat()}}).limit(limit).sort("post_date")
         chat_history = []
         async for message in cursor:
             chat_history.append(Message.Map(message))
@@ -104,7 +104,7 @@ class MongoMessengerDatabase():
         if date_offset is None:
             pipeline = [{"$match": {"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}}]
         else:
-            pipeline = [{"$match": {"$and": [{"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}, {"post_date": {"$gt": date_offset}}]}}]
+            pipeline = [{"$match": {"$and": [{"$or": [{"sender_id": user_id}, {"receiver_id": user_id}]}, {"post_date": {"$lt": date_offset.isoformat()}}]}}]
         pipeline += [
             {"$project": {"post_date": True, "dialoge_members": {"$setUnion": [["$sender_id"], ["$receiver_id"]]}}},
             {"$sort": {"dialoge_members": 1}},
