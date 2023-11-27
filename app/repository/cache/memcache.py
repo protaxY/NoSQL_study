@@ -7,8 +7,6 @@ from pymemcache import HashClient
 from repository.cache.serializer import JsonSerializer
 
 
-sys.stdout.flush()
-
 memcached_user_client: HashClient = None
 memcached_message_client: HashClient = None
 memcached_chat_history_client: HashClient = None
@@ -33,11 +31,12 @@ def connect_messenger_memcached():
     memcached_clients = [None for _ in range(4)]
 
     for i, (memcached_client, memcached_uri) in enumerate(zip(memcached_clients, memcached_uris)):
+        print(f"step{i}; clients = {memcached_client}; uris = {memcached_uri}", flush=True)
         try:
             memcached_clients[i] = HashClient(memcached_uri.split(','), serde=JsonSerializer())
-            print(f'Connected to user memcached with uri {memcached_uri}')
+            print(f'Connected to user memcached with uri {memcached_uri}', flush=True)
         except Exception as ex:
-            print(f'Cant connect to user memcached: {ex}')
+            print(f'Cant connect to user memcached: {ex}', flush=True)
 
     map_client_array(memcached_clients)
 

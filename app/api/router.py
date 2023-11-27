@@ -17,7 +17,6 @@ from pymemcache import HashClient
 
 from repository.cache.memcache import get_memcached_user_client, get_memcached_message_client, get_memcached_chat_history_client, get_memcached_recent_users_client
 
-sys.stdout.flush()
 
 router = APIRouter()
 
@@ -42,7 +41,7 @@ async def get_user_by_id(user_id: str,
 
     user = memcached_user_client.get(user_id)
     if user is not None:
-        print('using cached user data')
+        print('using cached user data', flush=True)
         return user
     
     user = await messenger_db.get_user_by_id(user_id)
@@ -83,10 +82,9 @@ async def get_chat_history(user_id: str, companion_id: str, date_offset: datetim
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
     
     if date_offset is not None:
-        print("in iso format", date_offset.isoformat(), flush=True)
         chat_history = memcached_chat_history_client.get(date_offset.isoformat())
         if chat_history is not None:
-            print('using cached chat history data')
+            print('using cached chat history data', flush=True)
             return chat_history
     
     chat_history = await messenger_db.get_chat_history(user_id, companion_id=companion_id, date_offset=date_offset)
@@ -126,7 +124,7 @@ async def get_recent_users(user_id: str, date_offset: datetime = None,
     if date_offset is not None:
         recent_users = memcached_recent_users_client.get(date_offset.isoformat())
     if recent_users is not None:
-        print('using cached recent users data')
+        print('using cached recent users data', flush=True)
         return recent_users
     
     recent_users = await messenger_db.get_recent_users(user_id, date_offset)
@@ -152,7 +150,7 @@ async def get_message_by_id(message_id: str,
 
     message = memcached_message_client.get(message_id)
     if message is not None:
-        print('using cached message data')
+        print('using cached message data', flush=True)
         return message
 
     message = await messenger_db.get_message_by_id(message_id)

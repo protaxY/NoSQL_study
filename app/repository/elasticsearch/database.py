@@ -7,7 +7,6 @@ from models.message import Message, MessageContent, PostMessage
 
 from models.user import InsertUser, User
 
-sys.stdout.flush()
 
 elasticsearch_client: AsyncElasticsearch = None
 
@@ -15,11 +14,11 @@ async def connect_elastic_messenger_database():
     global elasticsearch_client
     elasticsearch_messenger_uri = os.getenv('ELASTICSEARCH_MESSENGER_URI')
     try:
-        elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri)
+        elasticsearch_client = AsyncElasticsearch(elasticsearch_messenger_uri.split(','))
         await elasticsearch_client.info()
-        print(f'Connected to elasticsearch with uri {elasticsearch_messenger_uri}')
+        print(f'Connected to elasticsearch with uri {elasticsearch_messenger_uri}', flush=True)
     except Exception as ex:
-        print(f'Cant connect to elasticsearch: {ex}')
+        print(f'Cant connect to elasticsearch: {ex}', flush=True)
 
 async def close_elasticsearch_connect():
     global elasticsearch_client

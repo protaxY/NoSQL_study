@@ -12,7 +12,6 @@ from models.message import Message, PostMessage
 
 from repository.mongo.utils import filter_by_id
 
-sys.stdout.flush()
 
 mongo_client: AsyncIOMotorClient = None
 
@@ -27,7 +26,7 @@ async def connect_mongo_messenger_database():
     try:
         mongo_client = AsyncIOMotorClient(mongo_messenger_uri)
         await mongo_client.server_info()
-        print(f'Connected to mongo with uri {mongo_messenger_uri}')
+        print(f'Connected to mongo with uri {mongo_messenger_uri}', flush=True)
 
         # создать базу данных, если еще нет
         if mongo_messenger_db not in await mongo_client.list_database_names():
@@ -39,12 +38,12 @@ async def connect_mongo_messenger_database():
             mongo_messages_collection = mongo_client.get_database(
                 mongo_messenger_db).get_collection(mongo_messages_collection)
 
-            print(f'Database {mongo_messenger_db} created successfully!')
+            print(f'Database {mongo_messenger_db} created successfully!', flush=True)
 
             return True
 
     except Exception as ex:
-        print(f'Can\'t connect to mongo: {ex}')
+        print(f'Can\'t connect to mongo: {ex}', flush=True)
 
         return False
 
@@ -115,7 +114,7 @@ class MongoMessengerDatabase():
 
         recent_users = []
         async for recent_post in self._mongo_messages_collection.aggregate(pipeline):
-            print(recent_post)
+            print(recent_post, flush=True)
             for dialoge_member in recent_post["_id"]:
                 if dialoge_member != user_id:
                     recent_users.append(dialoge_member)
