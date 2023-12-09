@@ -5,6 +5,10 @@
 # files
 *.zip
 *.ipynb
+test_*.py
+test*.csv
+app.log
+users_result.json
 
 # cache
 __pycache__/
