@@ -13,3 +13,8 @@ __pycache__/
 data/
 
 *data_set.json
+test_*.py
+test*.csv
+
+/dumps/*.xml
+*.xml

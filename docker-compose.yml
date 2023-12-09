@@ -99,6 +99,8 @@ services:
     volumes:
       - ./data/mongo_node_01:/data/db
     command: mongod --replSet docker-replicaset
+    ports:
+      - 27017:27017
 
   mongo_db_node_02:
     image: mongo
@@ -154,7 +156,7 @@ services:
     volumes:
       - ./data/kibana:/usr/share/kibana/data
     environment:
-      - ELASTICSEARCH_HOSTS=elasticsearch_node_01,elasticsearch_node_02,elasticsearch_node_03
+      - ELASTICSEARCH_HOSTS=http://elasticsearch_node_01,http://elasticsearch_node_02,http://elasticsearch_node_03
     depends_on:
       elasticsearch_node_01:
         condition: service_healthy
