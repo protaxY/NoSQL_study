@@ -12,4 +12,4 @@ __pycache__/
 # data
 data/
 
-users_result.json
+*data_set.json
