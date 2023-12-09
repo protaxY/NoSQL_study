@@ -11,3 +11,5 @@ __pycache__/
 
 # data
 data/
+
+users_result.json
