@@ -15,6 +15,7 @@ __pycache__/
 
 # data
 data/
+data_dump/
 
 *data_set.json
 test_*.py

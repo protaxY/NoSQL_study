@@ -9,33 +9,9 @@ from pyspark.sql import SparkSession
 from bson import ObjectId
 
 DUMP_USERS_FILE_NAME = 'dumps/users_data_set.json'
+DUMP_MSG_FILE_NAME = 'dumps/msg_data_set.json'
 
-async def create_user(name, user_name, user_creation_date):
-    api_url = "http://localhost/messenger/users?"
-    params = {'name': name, "username": user_name, "timestamp": user_creation_date}
-    request = api_url + urllib.parse.urlencode(params)
-    response = await requests.post(request)
-    return response.json()
 
-def send_message(text_to_send, from_user, to_user, post_date):
-    url = f"http://localhost/messenger/users/{from_user}/chats/{to_user}"
-
-    payload = json.dumps({
-        "text_content": text_to_send,
-        "timestamp": post_date,
-    })
-    headers = {
-        'accept': 'application/json',
-        'Content-Type': 'application/json'
-    }
-    print(url)
-    requests.request("POST", url, headers=headers, data=payload)
-
-spark = SparkSession.builder \
-  .appName("writeExample") \
-  .master("spark://spark-master:<port>") \
-  .config("spark.jars", "<mongo-spark-connector-JAR-file-name>") \
-  .getOrCreate()
 
 # подготовка пользователей
 # users_tree = ET.parse('dumps/Users.xml')
@@ -64,3 +40,48 @@ spark = SparkSession.builder \
 # with open(DUMP_USERS_FILE_NAME, 'w') as f:
 #     print("saving users dump into json file...")
 #     json.dump(users_data_set, f)
+
+msg_tree = ET.parse('dumps/Posts.xml')
+msg_root = msg_tree.getroot()
+post_roots = dict()
+msg_data_set = []
+
+# first prepare post_roots
+with tqdm(total=len(msg_root)) as pbar:
+    for msg in msg_root:
+        if msg.get("PostTypeId") == "1" and msg.get("OwnerUserId") != None:
+           post_roots[msg.get("Id")] = msg.get("OwnerUserId") 
+        pbar.update(1)
+
+print("Creating new message data set...")
+with tqdm(total=len(msg_root)) as pbar:
+    for msg in msg_root:
+        creation_date = msg.get('CreationDate')
+        message_body = msg.get('Body')
+        if msg.get("PostTypeId") == "1":
+            # автор поста отправляет сообщение самому себе
+            msg_data_set.append({
+                "FromUser": msg.get("OwnerUserId"),
+                "ToUser": msg.get("OwnerUserId"),
+                "Message": message_body,
+                "CreationDate": creation_date,
+            })
+        else:
+            to_user = ""
+            try:
+                to_user = post_roots[msg.get("ParentId")]
+            except KeyError:
+                # пропускаем все сообщения, у которых неправильный родитель
+                continue
+            msg_data_set.append({
+                "FromUser": msg.get("OwnerUserId"),
+                "ToUser": to_user,
+                "Message": message_body,
+                "CreationDate": creation_date,
+            })
+
+        pbar.update(1)
+
+with open(DUMP_MSG_FILE_NAME, 'w') as f:
+    print("saving users dump into json file...")
+    json.dump(msg_data_set, f)
