@@ -156,7 +156,7 @@ services:
     volumes:
       - ./data/kibana:/usr/share/kibana/data
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch_node_01,http://elasticsearch_node_02,http://elasticsearch_node_03
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch_node_01:9200","http://elasticsearch_node_02:9200","http://elasticsearch_node_03:9200"]'
     depends_on:
       elasticsearch_node_01:
         condition: service_healthy
