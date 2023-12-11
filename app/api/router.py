@@ -22,11 +22,14 @@ router = APIRouter()
 
 
 @router.post("/users")
-async def create_user(name: str, username: str, 
+async def create_user(name: str, username: str, timestamp: datetime = None,
                       messenger_db: MongoMessengerDatabase = Depends(MongoMessengerDatabase.get_instance),
                       search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
+    creation_date = datetime.utcnow()
+    if timestamp is not None:
+        creation_date = timestamp
     user = InsertUser(name=name, username=username,
-                      creation_date=datetime.utcnow())
+                      creation_date=creation_date)
     user_id = await messenger_db.create_user(user)
     await search_db.create_user(user_id, user)
     return user_id
@@ -60,14 +63,16 @@ async def find_user_by_username(pattern: str,
 
 
 @router.post("/users/{user_id}/chats/{receiver_id}")
-async def send_message(user_id: str, receiver_id: str, content: MessageContent, 
+async def send_message(user_id: str, receiver_id: str, content: MessageContent, timestamp: datetime = None,
                        messenger_db: MongoMessengerDatabase = Depends(MongoMessengerDatabase.get_instance),
                        search_db: ElasticsearchMessengerDatabase = Depends(ElasticsearchMessengerDatabase.get_instance)):
     if not ObjectId.is_valid(user_id) or not ObjectId.is_valid(receiver_id):
         return Response(status_code=status.HTTP_400_BAD_REQUEST)
-
+    post_date = datetime.utcnow()
+    if timestamp is not None:
+        post_date = timestamp
     message = PostMessage(sender_id=user_id, receiver_id=receiver_id,
-                          content=content, post_date=datetime.utcnow())
+                          content=content, post_date=post_date)
     message_id = await messenger_db.add_message(message)
     await search_db.create_message(message_id, message)
     return message_id
