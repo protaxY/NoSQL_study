@@ -3,6 +3,8 @@
 - Волков Матвей (М8О-109М)
 - Федоров Антон (М8О-114М)
 
+## [Протокол тестирования](https://docs.google.com/document/d/1jP2d-u0rA_7Ztc4-n7yzQoyIewUxjzhTuKn9NvCl518/edit?usp=sharing)
+
 ## Полезные ссылки
 <img src="./docs/imgs/MongoDB_Logo.svg" width="200"/>
 
